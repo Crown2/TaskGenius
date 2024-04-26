@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+mongoose.set('debug', true);
 
 const Schema = mongoose.Schema;
 
@@ -8,7 +9,7 @@ const taskSchema = new mongoose.Schema({
     required: true
   },
   userId: { 
-    type: mongoose.Schema.Types.ObjectId, 
+    type: Number, 
     ref: 'User', 
     required: true 
   },
@@ -32,8 +33,8 @@ const taskSchema = new mongoose.Schema({
     type: String, 
     default: 'Incomplete' 
   }
-});
+}, {collection : 'Tasks'});
 
-const Task = mongoose.model('Task', taskSchema);
+const Task = mongoose.model('Task', taskSchema, 'Tasks');
 
 export default Task;

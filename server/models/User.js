@@ -3,8 +3,12 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const userSchema = new mongoose.Schema({
+  _id:{
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  },
   userId:{
-    type: mongoose.Schema.Types.ObjectId, 
+    type: Number, 
     ref: 'User', 
     required: true 
   },

@@ -22,13 +22,14 @@ app.use('/api/', userRouter);
 
 const runServer = async () => {
   try {
-    mongoose.connect(process.env.ATLAS_URI);
+    mongoose.connect(process.env.ATLAS_URI)
+    .then(() => {console.log('Connected to MongoDB')});
 
     app.listen(PORT, () => {
       console.log(`TaskGenius is running, server listening to ${PORT}`);
     });
   } catch (err) {
-    console.log("Error message: ", err);
+    console.log("Error connecting to the database:", err);
   }
 };
 runServer();
