@@ -4,12 +4,8 @@ mongoose.set('debug', true);
 const Schema = mongoose.Schema;
 
 const taskSchema = new mongoose.Schema({
-  taskId:{
-    type: Number,
-    required: true
-  },
   userId: { 
-    type: Number, 
+    type: String, 
     ref: 'User', 
     required: true 
   },
