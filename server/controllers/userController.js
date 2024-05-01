@@ -1,8 +1,11 @@
 import User from "../models/User.js";
+import taskService from "../services/taskService.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import validator from "validator";
+import mongoose from "mongoose";
 
+// Depreciated - Create a user
 const createUser = async (req, res) => {
   try {
     console.log(req.body);
@@ -51,6 +54,7 @@ const getAllUsers = async (req, res) => {
     }
 };
 
+// Login a user
 const userLogin = async (req, res) => {
   try {
     const { userName, password } = req.body;
@@ -72,31 +76,48 @@ const userLogin = async (req, res) => {
   }
 };
 
-// const userLogout = async (req, res) => {
+// const updateUser = async (req, res) => {
 //   try {
-//     // Get the count of all tasks with the status "completed" for a given userId
-//     const user = await User.findById(req.user.id);
+//     const userId = req.user.id;
 
-//     const user = await User.findOne({ userName: userName });
-//     if (!user) return res.status(403).json({ msg: `userController - loginUser: No user with the name ${userName}` });
+//     const updateUser = await User.findByIdAndUpdate(userId, { status }, { new: true }).select({status: 1});
+//     if (!user) return res.status(404).json({ msg: `User not found with id ${userId}` });
 
-//     const isMatch = await bcrypt.compare(password, user.password);
-//     if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
-    
-//     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-//     user.password = undefined;
+//     user.userName = userName;
+//     user.email = email;
 
-//     res.status(200).json({ token, user });
+//     const updatedUser = await user.save();
+//     res.status(200).json(updatedUser);
 
 //   } catch (error) {
 //     res.status(500).json({ error: error.message });
-
 //   }
 // };
 
+// Logout a user
+const userLogout = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const completedCount = await taskService.getCompletedCount(userId);
+    console.log(completedCount);
+
+    const updatedCount = await User.findByIdAndUpdate(userId, { completedTasks: completedCount }, { new: true }).select({completedTasks: 1});
+
+    if (!updatedCount) {
+      return res.status(403).json({ msg: `userController - loginUser: No user with the name ${userName}` });
+    } 
+
+    res.status(200).json({ message: 'User Logout Successful!' });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+
+  }
+};
+
 // Register a new user
 const userSignUp = async (req, res) => {
-  const { name, email, postalCode, password, roles } = req.body;
+  const { userName, email, password} = req.body;
 
   // Validate the email
   const isValidEmail = validator.isEmail(email);
@@ -127,7 +148,8 @@ const userSignUp = async (req, res) => {
     const newUser = new User({
       userName,
       email,
-      password: passwordHash
+      password: passwordHash,
+      createdAt: new Date()
     });
     const savedUser = await newUser.save();
     savedUser.password = undefined;
@@ -151,5 +173,6 @@ export {
     getUserId,
     getAllUsers,
     userLogin,
+    userLogout,
     userSignUp
   };

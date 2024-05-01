@@ -1,16 +1,24 @@
 import Task from "../models/Task.js";
+import taskService from "../services/taskService.js";
 
+// Create a task for a user
 const createTask = async (req, res) => {
   try {
-    console.log(req.body);
-    console.log(req.params.userId);
+    const task = {
+      userId: req.user.id,
+      title: req.body.title,
+      description: req.body.description,
+      category: req.body.category,
+      deadline: req.body.deadline,
+      status: req.body.status
+    }
 
-    // creating document using create method 
-    Task.create({ userId: req.params.userId, title: req.body.title, description: req.body.description, category: req.body.category, deadline: req.body.deadline, status: req.body.status }) 
-      .then(result => { 
-          console.log(result) ;
-          res.end(`Task ${req.body.title} created successfully for user ${req.params.userId}`);  
-      });
+    await taskService.createTask(task).then(result => {
+      console.log(result); 
+      res.end(`Task ${task.title} created successfully for user ${task.userId}`);
+    
+    });
+
     } catch (err) {
       res.status(500).json({ error: `taskController - createTask: ${err.message}` });
 
@@ -20,19 +28,20 @@ const createTask = async (req, res) => {
 //Update a task by its id
 const updateTask = async (req, res) => {
   try {
-    console.log(req.body);
-    console.log(req.params.taskId);
-
+    const taskId = req.params.taskId;
     const updatedFields = {};
+    let loggedFields = "";
+
     for (const key in req.body) {
+      loggedFields += `${key}, `;
       updatedFields[key] = req.body[key];
     }
 
-    Task.findByIdAndUpdate(req.params.taskId, updatedFields)
-      .then(result => {
-        console.log(result) ;
-        res.end(`Task ${req.body.title} updated successfully`);
-      });
+    await taskService.updateTask(taskId, updatedFields).then(result => {
+      console.log(result);
+      res.end(`Updated Task ${taskId} fields: ${loggedFields}successfully`);
+    
+    });
 
     } catch (err) {
       res.status(500).json({ error: `taskController - updateTask: ${err.message}` });
@@ -44,16 +53,15 @@ const updateTask = async (req, res) => {
 // Update a task status by its id
 const updateTaskStatus = async (req, res) => {
   try {
-    const taskId = req.params.taskId; // Get the taskId from request parameters
-    const status = req.body.status; // Get the new status from request body
+    const taskId = req.params.taskId;
+    const newStatus = req.body.status; 
 
-    const updatedStatus = await Task.findByIdAndUpdate(taskId, { status }, { new: true }).select({status: 1});
+    await taskService.updateTaskStatus(taskId, newStatus).then(result => {
+      console.log(result);
 
-    if (!updatedStatus) {
-      return res.status(400).json({ msg: `taskController - updateTaskStatus: Task not found` });
-    }
-  
-    res.status(200).json(updatedStatus);
+      res.end(`Task ${taskId} status updated: ${newStatus}`);
+    
+    });
 
   } catch (err) {
     res.status(500).json({ error: `taskController - updateTaskStatus: ${err.message}` });
@@ -64,10 +72,8 @@ const updateTaskStatus = async (req, res) => {
 // Get all tasks for a user
 const getAllTasks = async (req, res) => {
     try {
-      console.log(req.params.userId);
-
-      const param = req.params.userId; // Get the userId from request parameters
-      const tasks = await Task.find({ userId: param }); // Find tasks by userId
+      const userId = req.user.id;
+      const tasks = await taskService.getAllTasks(userId);
 
       if (!tasks || tasks.length === 0) {
         return res.status(400).json({ msg: "taskController - getAllTasks: This user does not have any tasks" });
@@ -83,9 +89,9 @@ const getAllTasks = async (req, res) => {
 // Get a single task by its id
 const getTaskById = async (req, res) => {
   try {
-    const taskId = req.params.taskId; // Get the taskId from request parameters
-    const task = await Task.findById(taskId); // Find task by taskId
-    console.log(task);
+    const taskId = req.params.taskId; 
+    const task = await taskService.getTaskById(taskId);
+
     if (!task) {
       return res.status(400).json({ msg: "taskController - getTasksById: Task not found" });
     }
@@ -98,16 +104,17 @@ const getTaskById = async (req, res) => {
   }
 };
 
+// Get the number of completed tasks for a user
 const getCompletedTasks = async (req, res) => {
   try {
-    const userId = req.user.id; // Get the userId from request parameters
-    const completedTasks = await Task.find({ userId, status: "completed" }); // Find tasks by userId and status
+    const userId = req.user.id;
+    const completedTasks = await Task.find({userId: userId, status: "Completed"}).countDocuments();
 
-    if (!completedTasks || completedTasks.length === 0) {
+    if (!completedTasks) {
       return res.status(400).json({ msg: "taskController - getCompletedTasks: No completed tasks found" });
     }
   
-    res.status(200).json(completedTasks.length);
+    res.status(200).json(completedTasks);
 
   } catch (err) {
     res.status(500).json({ error: `taskController - getCompletedTasks: ${err.message}` });
@@ -118,9 +125,9 @@ const getCompletedTasks = async (req, res) => {
 // Delete a task by its id
 const deleteTask = async (req, res) => {
   try {
-    const taskId = req.params.taskId; // Get the taskId from request parameters
-    const task = await Task.findByIdAndDelete(taskId); // Find and delete task by taskId
-    console.log(task);
+    const taskId = req.params.taskId; 
+    const task = await taskService.deleteTask(taskId);
+
     if (!task) {
       return res.status(400).json({ msg: "Task not found" });
     }
