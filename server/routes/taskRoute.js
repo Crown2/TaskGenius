@@ -15,15 +15,15 @@ import {
 
 const routePrefix = "/tasks";
 
-taskRouter.post(`${routePrefix}/createTask/:userId`, createTask);
+taskRouter.post(`${routePrefix}/createTask/:userId`, verifyToken, createTask);
 
 taskRouter.put(`${routePrefix}/updateTask/:taskId`, updateTask);
 taskRouter.put(`${routePrefix}/updateTaskStatus/:taskId`, updateTaskStatus);
 
-taskRouter.get(`${routePrefix}/getAllTasks/:userId`, getAllTasks);
+taskRouter.get(`${routePrefix}/getAllTasks/`, verifyToken, getAllTasks);
 taskRouter.get(`${routePrefix}/getTaskById/:taskId`, getTaskById);
-taskRouter.get(`${routePrefix}/getCompletedTasks`, verifyToken, getTaskById);
+taskRouter.get(`${routePrefix}/getCompletedTasks`, verifyToken, getCompletedTasks);
 
-taskRouter.delete(`${routePrefix}/deleteTask/:taskId`, deleteTask);
+taskRouter.delete(`${routePrefix}/deleteTask/:taskId`, verifyToken, deleteTask);
 
 export default taskRouter;
