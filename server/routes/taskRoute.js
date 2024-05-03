@@ -15,12 +15,12 @@ import {
 
 const routePrefix = "/tasks";
 
-taskRouter.post(`${routePrefix}/createTask/:userId`, verifyToken, createTask);
+taskRouter.post(`${routePrefix}/createTask`, verifyToken, createTask);
 
 taskRouter.put(`${routePrefix}/updateTask/:taskId`, updateTask);
 taskRouter.put(`${routePrefix}/updateTaskStatus/:taskId`, updateTaskStatus);
 
-taskRouter.get(`${routePrefix}/getAllTasks/`, verifyToken, getAllTasks);
+taskRouter.get(`${routePrefix}/getAllTasks`, verifyToken, getAllTasks);
 taskRouter.get(`${routePrefix}/getTaskById/:taskId`, getTaskById);
 taskRouter.get(`${routePrefix}/getCompletedTasks`, verifyToken, getCompletedTasks);
 

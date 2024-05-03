@@ -1,5 +1,4 @@
-// services/userService.js
-import { get } from "mongoose";
+// services/taskService.js
 import Task from "../models/Task.js";
 
 async function createTask(task){
@@ -7,27 +6,56 @@ async function createTask(task){
 };
 
 async function updateTask(taskId, updatedFields){
-        return await Task.findByIdAndUpdate(taskId, updatedFields);
+
+        const task = await Task.findByIdAndUpdate(taskId, updatedFields, { new: true });
+        if (!task) {
+                throw new customError("Task not found", 404);
+        }
+
+        return task;
 };
 
 async function updateTaskStatus(taskId, newStatus){
-        return await Task.findByIdAndUpdate(taskId, { status: newStatus }, { new: true }).select({ status: 1 });
+        const status = await Task.findByIdAndUpdate(taskId, { status: newStatus }, { new: true }).select({ status: 1 });
+
+        if (!task) {
+                throw new customError("Task not found", 404);
+        }
+
+        return status;
 };
 
 async function getAllTasks(userId){
-        return await Task.find({ userId: userId });
+        const taskList =  await Task.find({ userId: userId });
+        
+        if (!taskList) {
+                throw new customError(`No tasks found for user ${userId}`, 404);
+        }
+
+        return taskList;
 };
 
 async function getTaskById(taskId){
-        return await Task.findById(taskId);
+        const task = await Task.findById(taskId);
+
+        if (!task) {
+                throw new customError(`Task ${taskId} not found`, 404);
+        }
+        
+        return task;
 };
 
 async function getCompletedCount(userId){
         return await Task.find({userId: userId, status: "Completed"}).countDocuments();
+
 };
 
 async function deleteTask(taskId){
-        return await Task.findByIdAndDelete(taskId);
+        const task = await Task.findByIdAndDelete(taskId);
+
+        if (!task) {
+                throw new customError(`Task ${taskId} not found`, 404);
+        }
 };
 
 export default { 

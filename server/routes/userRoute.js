@@ -4,9 +4,8 @@ import {
   userLogin,
   userSignUp,
   userLogout,
-  createUser,
-  getAllUsers,
-  getUserId
+  updateUser,
+  getUserById
 } from '../controllers/userController.js';
 
  const userRouter = Router();
@@ -15,8 +14,8 @@ import {
  userRouter.post(`/login`, userLogin);
  userRouter.post(`/signup`, userSignUp);
  userRouter.post(`/logout`, verifyToken, userLogout);
- userRouter.post(`${routePrefix}/createUser`, createUser);
- userRouter.get(`${routePrefix}/getAllUsers`, getAllUsers);
- userRouter.get(`${routePrefix}/getUserId/:userName`, getUserId);
+ userRouter.put(`${routePrefix}/updateUser`, verifyToken, updateUser);
+ userRouter.get(`${routePrefix}/getUserById`, verifyToken, getUserById);
+ userRouter.delete(`${routePrefix}/deleteUser`, verifyToken, deleteUser);
 
 export default userRouter;
