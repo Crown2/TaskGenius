@@ -5,7 +5,8 @@ import {
   userSignUp,
   userLogout,
   updateUser,
-  getUserById
+  getUserById,
+  deleteUser
 } from '../controllers/userController.js';
 
  const userRouter = Router();
